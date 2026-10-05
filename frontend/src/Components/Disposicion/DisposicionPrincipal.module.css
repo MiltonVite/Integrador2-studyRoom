@@ -1,0 +1,16 @@
+.disposicion {
+  display: flex;
+  min-height: 100vh;
+}
+
+.principal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.contenido {
+  flex: 1;
+  padding: 8px 28px 28px;
+}

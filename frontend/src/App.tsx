@@ -1,11 +1,21 @@
-import logo_utp from './assets/logo_utp.png'
-function App() {
-  
-  return (
-    <>
-      <img src={logo_utp} />
-    </>
-  )
-}
+// function App() {
 
-export default App
+//   return (
+//     <>
+
+//     </>
+//   )
+// }
+
+// export default App
+
+import DisposicionPrincipal from './Components/Disposicion/DisposicionPrincipal';
+import ListaEsperaPage from './Features/listaEspera/ListaEsperaPage';
+
+export default function App() {
+  return (
+    <DisposicionPrincipal seccionActiva="Lista de Espera">
+      <ListaEsperaPage />
+    </DisposicionPrincipal>
+  );
+}

@@ -1,0 +1,48 @@
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--superficie);
+  border-right: 1px solid var(--borde);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.logo img {
+  height: 40px;
+  display: block;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+
+  font-size: 0.9rem;
+  color: var(--texto);
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: #f1f4f9;
+}
+
+.activo,
+.activo:hover {
+  background: var(--azul-oscuro);
+  color: #fff;
+}

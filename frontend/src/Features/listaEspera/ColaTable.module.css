@@ -1,0 +1,28 @@
+.contenedor {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 8px 16px;
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla th {
+  font-weight: 500;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}

@@ -1,0 +1,82 @@
+# =============================================================================
+# GITIGNORE - SISTEMA INTELIGENTE DE GESTIÓN DE SALAS DE ESTUDIO
+# =============================================================================
+
+# Entornos Virtuales y Python
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Dependencias y Builds de Frontend / Node
+node_modules/
+dist/
+build/
+.next/
+out/
+.nuxt/
+.cache/
+.turbo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Modelos Pesados de Inteligencia Artificial y Pesos de Redes Neuronales
+*.pt
+*.pth
+*.onnx
+*.engine
+*.weights
+*.bin
+*.tflite
+runs/
+ai_service/models/*.pt
+ai_service/models/*.onnx
+!ai_service/models/.gitkeep
+
+# Variables de Entorno y Credenciales
+.env
+.env.*
+!.env.example
+!backend/.env.example
+
+# Datos y Volúmenes de Docker / Base de Datos
+postgres_data/
+*.dump
+*.sql.bak
+*.sqlite3
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editores y Entornos de Desarrollo
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+.gemini/
+.agents/
+
+# Logs y Archivos Temporales
+logs/
+*.log
+tmp/
+temp/

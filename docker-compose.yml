@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # BASE DE DATOS POSTGRESQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: studyroom_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: studyroom_db
+      POSTGRES_USER: studyroom_user
+      POSTGRES_PASSWORD: studyroom_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/database.sql:/docker-entrypoint-initdb.d/01_database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyroom_user -d studyroom_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - studyroom_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  studyroom_network:
+    driver: bridge

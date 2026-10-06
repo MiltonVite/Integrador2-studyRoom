@@ -24,14 +24,14 @@ export const UsuariosPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
 
-  // Filtrado reactivo de usuarios
+  // Filtrado reactivo de personal
   const usuariosFiltrados = useMemo(() => {
     return usuarios.filter((u) => {
       const matchSearch =
         u.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.codigo_institucional.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.carrera.toLowerCase().includes(searchTerm.toLowerCase());
+        (u.departamento && u.departamento.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchRol = rolFiltro === 'TODOS' || u.rol === rolFiltro;
 
@@ -39,13 +39,13 @@ export const UsuariosPage = () => {
     });
   }, [usuarios, searchTerm, rolFiltro]);
 
-  // Contadores KPI
+  // Contadores KPI de Personal
   const stats = useMemo(() => {
     return {
       total: usuarios.length,
       administradores: usuarios.filter((u) => u.rol === 'ADMINISTRADOR').length,
       operadores: usuarios.filter((u) => u.rol === 'OPERADOR').length,
-      estudiantes: usuarios.filter((u) => u.rol === 'ESTUDIANTE').length,
+      supervisores: usuarios.filter((u) => u.rol === 'SUPERVISOR' || u.rol === 'RECEPCION_BIBLIOTECA').length,
       activos: usuarios.filter((u) => u.estado === 'ACTIVO').length,
     };
   }, [usuarios]);
@@ -66,40 +66,44 @@ export const UsuariosPage = () => {
         return <span className="user-role-badge admin">Administrador</span>;
       case 'OPERADOR':
         return <span className="user-role-badge operator">Operador TI</span>;
-      case 'DOCENTE':
-        return <span className="user-role-badge teacher">Docente</span>;
+      case 'SUPERVISOR':
+        return <span className="user-role-badge teacher">Supervisor</span>;
+      case 'RECEPCION_BIBLIOTECA':
+        return <span className="user-role-badge student">Recepción / Salas</span>;
       default:
-        return <span className="user-role-badge student">Estudiante</span>;
+        return <span className="user-role-badge operator">Personal</span>;
     }
   };
 
   return (
     <div className="page-view">
       {/* Header */}
-      <div className="view-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="view-header">
         <div className="view-title-wrap">
-          <h1>Directorio y Gestión de Usuarios</h1>
+          <h1>Directorio de Personal y Operadores de Salas</h1>
           <p>
-            Administración de cuentas institucionales en tablas <code>usuarios</code>, <code>roles</code> y permisos
+            Administración de cuentas internas de personal UTP en tablas <code>usuarios</code>, <code>roles</code> y permisos de acceso
           </p>
         </div>
-        <button className="btn-utp-primary" onClick={handleAbrirCrear}>
-          <UserPlus size={16} />
-          <span>+ Registrar Nuevo Usuario</span>
-        </button>
+        <div className="view-actions-row">
+          <button className="btn-utp-primary" onClick={handleAbrirCrear}>
+            <UserPlus size={16} />
+            <span>Registrar Nuevo Personal</span>
+          </button>
+        </div>
       </div>
 
       {/* Tarjetas KPI de Usuarios */}
       <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-top-row">
-            <span className="kpi-label">Total Usuarios</span>
+            <span className="kpi-label">Total Personal</span>
             <div className="kpi-icon-pill blue">
               <Users size={18} />
             </div>
           </div>
           <div className="kpi-value">{stats.total}</div>
-          <div className="kpi-subtext">Cuentas registradas en el campus</div>
+          <div className="kpi-subtext">Cuentas autorizadas en campus</div>
         </div>
 
         <div className="kpi-card">
@@ -110,7 +114,7 @@ export const UsuariosPage = () => {
             </div>
           </div>
           <div className="kpi-value">{stats.administradores}</div>
-          <div className="kpi-subtext">Acceso total a configuración</div>
+          <div className="kpi-subtext">Control total de configuración y políticas</div>
         </div>
 
         <div className="kpi-card">
@@ -121,18 +125,18 @@ export const UsuariosPage = () => {
             </div>
           </div>
           <div className="kpi-value">{stats.operadores}</div>
-          <div className="kpi-subtext">Monitoreo y liberación de salas</div>
+          <div className="kpi-subtext">Monitoreo de cámaras y liberación</div>
         </div>
 
         <div className="kpi-card">
           <div className="kpi-top-row">
-            <span className="kpi-label">Estudiantes Activos</span>
+            <span className="kpi-label">Supervisores & Recepción</span>
             <div className="kpi-icon-pill green">
-              <GraduationCap size={18} />
+              <UserCheck size={18} />
             </div>
           </div>
-          <div className="kpi-value">{stats.estudiantes}</div>
-          <div className="kpi-subtext">{stats.activos} usuarios con acceso habilitado</div>
+          <div className="kpi-value">{stats.supervisores}</div>
+          <div className="kpi-subtext">{stats.activos} cuentas activas en el sistema</div>
         </div>
       </div>
 
@@ -146,7 +150,7 @@ export const UsuariosPage = () => {
               type="text"
               className="form-input"
               style={{ paddingLeft: '38px', width: '100%' }}
-              placeholder="Buscar por código (ej: U20211045), nombre o carrera..."
+              placeholder="Buscar por código de personal (ej: U20211045), nombre o departamento..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -154,13 +158,21 @@ export const UsuariosPage = () => {
 
           {/* Filtro de Roles */}
           <div className="severity-filter-bar" style={{ margin: 0 }}>
-            {['TODOS', 'ADMINISTRADOR', 'OPERADOR', 'ESTUDIANTE'].map((rol) => (
+            {['TODOS', 'ADMINISTRADOR', 'OPERADOR', 'SUPERVISOR', 'RECEPCION_BIBLIOTECA'].map((rol) => (
               <button
                 key={rol}
                 className={`severity-filter-btn ${rolFiltro === rol ? 'active' : ''}`}
                 onClick={() => setRolFiltro(rol)}
               >
-                {rol === 'TODOS' ? 'Todos los Roles' : rol}
+                {rol === 'TODOS'
+                  ? 'Todos'
+                  : rol === 'RECEPCION_BIBLIOTECA'
+                  ? 'Recepción'
+                  : rol === 'OPERADOR'
+                  ? 'Operadores'
+                  : rol === 'SUPERVISOR'
+                  ? 'Supervisores'
+                  : 'Administradores'}
               </button>
             ))}
           </div>
@@ -172,10 +184,10 @@ export const UsuariosPage = () => {
         <table className="audit-table">
           <thead>
             <tr>
-              <th>USUARIO INSTITUCIONAL</th>
+              <th>PERSONAL INSTITUCIONAL</th>
               <th>CORREO UTP</th>
               <th>ROL</th>
-              <th>CARRERA / ÁREA</th>
+              <th>DEPARTAMENTO / ÁREA</th>
               <th>ESTADO</th>
               <th style={{ textAlign: 'right' }}>ACCIONES</th>
             </tr>
@@ -184,7 +196,7 @@ export const UsuariosPage = () => {
             {usuariosFiltrados.length === 0 ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
-                  No se encontraron usuarios con los criterios de búsqueda especificados.
+                  No se encontró personal institucional con los criterios especificados.
                 </td>
               </tr>
             ) : (
@@ -192,7 +204,19 @@ export const UsuariosPage = () => {
                 <tr key={u.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div className="waitlist-avatar" style={{ backgroundColor: u.rol === 'ADMINISTRADOR' ? '#7c3aed' : u.rol === 'OPERADOR' ? '#2563eb' : '#0f172a' }}>
+                      <div
+                        className="waitlist-avatar"
+                        style={{
+                          backgroundColor:
+                            u.rol === 'ADMINISTRADOR'
+                              ? '#7c3aed'
+                              : u.rol === 'SUPERVISOR'
+                              ? '#ea580c'
+                              : u.rol === 'RECEPCION_BIBLIOTECA'
+                              ? '#059669'
+                              : '#2563eb',
+                        }}
+                      >
                         {u.nombre_completo.charAt(0)}
                       </div>
                       <div>
@@ -211,7 +235,7 @@ export const UsuariosPage = () => {
                   <td>{getRoleBadge(u.rol)}</td>
                   <td>
                     <span style={{ color: '#334155', fontSize: '12.5px', fontWeight: 500 }}>
-                      {u.carrera}
+                      {u.departamento}
                     </span>
                   </td>
                   <td>
@@ -226,7 +250,7 @@ export const UsuariosPage = () => {
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                       <button
                         className="btn-icon-action"
-                        title="Editar Usuario"
+                        title="Editar Personal"
                         onClick={() => handleAbrirEditar(u)}
                       >
                         <Edit2 size={15} />

@@ -15,27 +15,35 @@ Este módulo contiene la aplicación web desarrollada en **React 18 + Vite** con
 
 ---
 
-##  Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 frontend/
 ├── src/
 │   ├── components/
 │   │   ├── Navbar.jsx                   # Barra superior con acceso directo a cámaras IA, búsqueda y alertas
-│   │   ├── Sidebar.jsx                  # Menú lateral institucional limpio con tarjeta de usuario y Cámaras IA
-│   │   ├── ModalNuevaReserva.jsx        # Diálogo para registrar reservas según esquema de BD
+│   │   ├── Sidebar.jsx                  # Menú lateral institucional con tarjeta de usuario, módulo Usuarios y logout
+│   │   ├── ModalNuevaReserva.jsx        # Diálogo para registrar reservas con validación Zod y React Hook Form
+│   │   ├── ModalNuevoUsuario.jsx        # Diálogo para registrar/editar usuarios institucionales
 │   │   ├── ModalConfirmarLiberacion.jsx # Diálogo de confirmación con registro de motivo de liberación
 │   │   └── ModalSimulador.jsx           # Simulador interactivo de visión artificial y webhooks
 │   ├── context/
-│   │   └── AppContext.jsx               # Estado global, reglas de temporizador y motor de eventos
+│   │   └── AppContext.jsx               # Estado global, autenticación, directorio de usuarios y motor de eventos
 │   ├── pages/
+│   │   ├── LoginPage.jsx                # Vista inicial de Login Institucional con credenciales UTP y atajos demo
 │   │   ├── DashboardPage.jsx            # Vista principal: Hero card, KPIs limpios y grilla de salas
 │   │   ├── ReservasPage.jsx             # Matriz horaria (Timeline), validación IA y detalle de reservas
 │   │   ├── CamarasPage.jsx              # Monitoreo en vivo de 6 cámaras RTSP con Bounding Boxes IA
 │   │   ├── AlertasPage.jsx              # Centro de auditoría IA con visor de evidencia
 │   │   ├── ListaEsperaPage.jsx          # Gestión y reasignación de cola de espera
+│   │   ├── UsuariosPage.jsx             # Directorio y administración de usuarios, roles y estados
 │   │   └── ConfiguracionPage.jsx        # Parámetros de tolerancia, políticas y estado de cámaras RTSP
-│   ├── App.jsx                          # Orquestador principal de vistas y navegación
+│   ├── schemas/
+│   │   ├── reservaSchema.js             # Esquemas declarativos Zod para reservas y lista de espera
+│   │   └── usuarioSchema.js             # Esquemas declarativos Zod para login y gestión de usuarios
+│   ├── utils/
+│   │   └── permisos.js                  # Matriz de permisos RBAC por rol institucional
+│   ├── App.jsx                          # Orquestador principal con guardia de login y navegación por rol
 │   ├── index.css                        # Hoja de estilos global y tokens de diseño SaaS
 │   └── main.jsx                         # Punto de entrada de React DOM
 ├── index.html                           # Documento raíz con tipografía Plus Jakarta Sans
@@ -47,21 +55,27 @@ frontend/
 
 ---
 
-##  Módulos y Vistas Desarrolladas
+## Módulos y Vistas Desarrolladas
 
-### 1. Inicio / Dashboard (`DashboardPage.jsx`)
+### 1. Acceso y Autenticación Institucional (`LoginPage.jsx`)
+- **Pantalla Inicial:** Al abrir la aplicación, se presenta la vista de acceso institucional antes de entrar al panel.
+- **Panel de Marca UTP:** Diseño con degradado institucional, propuesta de valor de Visión Artificial y monitoreo continuo.
+- **Validación con React Hook Form + Zod:** Control de formato de código UTP (`U20211045`) o correo institucional (`@utp.edu.pe`).
+- **Atajos Demo:** Botones de acceso rápido para probar el sistema como *Administrador* o como *Operador de Salas*.
+
+### 2. Inicio / Dashboard (`DashboardPage.jsx`)
 - **Hero Card de Bienvenida:** Saludo personalizado con badge de rol (*Administrador*) y selector de fecha.
 - **Métricas KPI en tarjetas SaaS:** *Total Salas (06)*, *Disponibles (03)*, *% Ocupación (50%)* e *Incidencias IA (02)* con subtítulos descriptivos.
 - **Grilla de Salas Grupales:** Monitoreo visual de las 6 salas con indicadores de equipamiento (PC, Pizarra, Capacidad: 6 personas).
 - **Protocolo Sala Libre (Liberación Automática por IA):** Cuenta regresiva en vivo cuando la cámara detecta 0 personas en una sala con reserva activa.
 - **Liberación Segura con Modal de Confirmación:** Diálogo previo para seleccionar el motivo de auditoría antes de desocupar cualquier espacio.
 
-### 2. Gestión de Reservas y Calendario (`ReservasPage.jsx`)
+### 3. Gestión de Reservas y Calendario (`ReservasPage.jsx`)
 - **KPIs operacionales:** Reservas del día, en curso, próximas y detecciones de inasistencia (*No-Show*).
 - **Matriz Horaria Interactiva:** Grilla de 08:00 a 15:00 por sala con bloques de reserva clasificados por color y estado.
 - **Panel de Inspección:** Detalle del alumno titular, código institucional, franja horaria y confirmación con badge `Validado por Visión IA`.
 
-### 3. Cámaras de Visión Artificial en Vivo (`CamarasPage.jsx`) *(Nuevo módulo exclusivo)*
+### 4. Cámaras de Visión Artificial en Vivo (`CamarasPage.jsx`)
 - **Transmisión de 6 cámaras RTSP:** Vista en tiempo real de cada una de las salas físicas (`CAM-A101` a `CAM-A106`).
 - **Superposición de Bounding Boxes (Cajas Delimitadoras IA):**
   - Detección de personas y conteo dinámico.
@@ -69,21 +83,26 @@ frontend/
   - Detección de alimentos y bebidas no permitidas con alerta roja.
 - **Visor a pantalla completa e inspección técnica:** Muestra la IP del dispositivo, resolución Full HD, FPS y URI de streaming RTSP.
 
-### 4. Centro de Alertas y Auditoría IA (`AlertasPage.jsx`)
+### 5. Directorio y Gestión de Usuarios (`UsuariosPage.jsx`)
+- **KPIs de Usuarios:** Total de cuentas, administradores, operadores de salas y estudiantes activos.
+- **Búsqueda y Filtros:** Filtrado en tiempo real por código, nombre, carrera y rol (`ADMINISTRADOR`, `OPERADOR`, `ESTUDIANTE`).
+- **Control de Cuentas:** Activación y suspensión de cuentas con un clic y modal de edición/creación con Zod.
+
+### 6. Centro de Alertas y Auditoría IA (`AlertasPage.jsx`)
 - **Filtros por severidad:** *Todas*, *Baja*, *Media*, *Importante*, *Crítica*.
 - **Visor de Evidencia Fotográfica:** Muestra fotogramas capturados por las cámaras con cajas delimitadoras.
 - **Acciones de resolución inmediata:** Botones para `Confirmar Sala Libre Ahora` o `Mantener Reserva`.
 
-### 5. Configuración del Sistema y Parámetros IA (`ConfiguracionPage.jsx`)
+### 7. Configuración del Sistema y Parámetros IA (`ConfiguracionPage.jsx`)
 - **Políticas de Tiempo:** Configuración de rangos de duración mínima y máxima de reserva.
 - **Calibración de Visión Artificial:** Slider para ajustar el tiempo de tolerancia sin ocupantes antes de ejecutar la liberación automática (4 a 10 minutos).
 - **Switches inteligentes:** Habilitación de detección de pertenencias personales y auto-notificación a la lista de espera.
 - **Gestión de Periféricos y RTSP:** Checklist de equipamiento por sala y estado de conexión de cámaras en vivo (*OK/Conectado*).
 
-### 6. Lista de Espera Inteligente (`ListaEsperaPage.jsx`)
+### 8. Lista de Espera Inteligente (`ListaEsperaPage.jsx`)
 - Tabla de estudiantes en cola con orden de prioridad, tamaño del grupo y botón de asignación inmediata tras liberación de salas.
 
-### 7. Simulador de Eventos de Integración (`ModalSimulador.jsx`)
+### 9. Simulador de Eventos de Integración (`ModalSimulador.jsx`)
 - Herramienta interactiva para probar el flujo completo:
   1. Simular desocupación anticipada de una sala (activa el temporizador de abandono).
   2. Simular detección de alimentos o bebidas no permitidas.
@@ -91,7 +110,26 @@ frontend/
 
 ---
 
-##  Despliegue y Ejecución
+## Matriz de Roles y Permisos (RBAC - `permisos.js`)
+
+El sistema implementa control de acceso basado en roles para el personal universitario:
+
+| Módulo / Acción | ADMINISTRADOR | SUPERVISOR | OPERADOR | SEGURIDAD | RECEPCIÓN |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Inicio / Dashboard** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Cámaras IA (RTSP)** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Incidencias IA (Alertas)** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Gestión de Reservas** | ✅ | ✅ | ✅ (Sólo lectura) | ❌ | ✅ |
+| **Crear Reserva Presencial** | ✅ | ✅ | ❌ | ❌ | ✅ |
+| **Liberar Sala** | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **Lista de Espera** | ✅ | ✅ | ❌ | ❌ | ✅ |
+| **Directorio de Personal** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Configuración del Sistema** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Simulador de Visión IA** | ✅ | ✅ | ✅ | ❌ | ❌ |
+
+---
+
+## Despliegue y Ejecución
 
 ### Opción 1: Con Docker Compose (Frontend Únicamente)
 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Settings, Sliders, Camera, Save, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { tienePermiso, PERMISOS } from '../utils/permisos';
 
 export const ConfiguracionPage = () => {
-  const { config, setConfig, salas, addToast } = useApp();
+  const { config, setConfig, salas, addToast, usuarioActual } = useApp();
   const [formData, setFormData] = useState({ ...config });
   const [salasEquipamiento, setSalasEquipamiento] = useState(
     salas.map((s) => ({
@@ -16,7 +17,13 @@ export const ConfiguracionPage = () => {
     }))
   );
 
+  const puedeEditar = tienePermiso(usuarioActual?.rol, PERMISOS.EDITAR_CONFIGURACION);
+
   const handleSave = () => {
+    if (!puedeEditar) {
+      addToast('No tienes permisos para modificar la configuración del sistema.', 'error');
+      return;
+    }
     setConfig(formData);
     addToast('¡Parámetros del sistema y visión artificial guardados con éxito!', 'success');
   };
@@ -36,10 +43,12 @@ export const ConfiguracionPage = () => {
         </div>
 
         <div className="hero-actions-row">
-          <button className="btn-utp-primary" onClick={handleSave}>
-            <Save size={16} />
-            <span>Guardar Parámetros</span>
-          </button>
+          {puedeEditar && (
+            <button className="btn-utp-primary" onClick={handleSave}>
+              <Save size={16} />
+              <span>Guardar Parámetros</span>
+            </button>
+          )}
         </div>
       </div>
 

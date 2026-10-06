@@ -14,9 +14,10 @@ import {
 import { useApp } from '../context/AppContext';
 import { ModalNuevaReserva } from '../components/ModalNuevaReserva';
 import { ModalConfirmarLiberacion } from '../components/ModalConfirmarLiberacion';
+import { tienePermiso, PERMISOS } from '../utils/permisos';
 
 export const ReservasPage = () => {
-  const { salas } = useApp();
+  const { salas, usuarioActual } = useApp();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLiberarOpen, setModalLiberarOpen] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState({
@@ -88,15 +89,17 @@ export const ReservasPage = () => {
           <h1>Gestión de Reservas y Calendario</h1>
           <p>Supervisión horaria, validación por visión artificial y prevención de No-Shows</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="view-actions-row">
           <div className="date-pill">
             <CalendarIcon size={16} color="#64748b" />
             <span>Hoy, 17 Octubre 2026</span>
           </div>
-          <button className="btn-utp-primary" onClick={() => setModalOpen(true)}>
-            <Plus size={16} />
-            <span>+ Nueva Reserva</span>
-          </button>
+          {tienePermiso(usuarioActual?.rol, PERMISOS.CREAR_RESERVA) && (
+            <button className="btn-utp-primary" onClick={() => setModalOpen(true)}>
+              <Plus size={16} />
+              <span>Nueva Reserva</span>
+            </button>
+          )}
         </div>
       </div>
 

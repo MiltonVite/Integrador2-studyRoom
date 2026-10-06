@@ -21,11 +21,11 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
     resolver: zodResolver(usuarioFormSchema),
     mode: 'onChange',
     defaultValues: {
-      codigo_institucional: 'U20239999',
+      codigo_institucional: 'U20241001',
       nombre_completo: '',
-      correo: 'u20239999@utp.edu.pe',
-      rol: 'ESTUDIANTE',
-      carrera: 'Ingeniería de Sistemas e Informática',
+      correo: 'u20241001@utp.edu.pe',
+      rol: 'OPERADOR',
+      departamento: 'Soporte y Monitoreo de Salas',
       telefono: '999888777',
       estado: 'ACTIVO',
     },
@@ -38,7 +38,7 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
         nombre_completo: usuarioAEditar.nombre_completo,
         correo: usuarioAEditar.correo,
         rol: usuarioAEditar.rol,
-        carrera: usuarioAEditar.carrera,
+        departamento: usuarioAEditar.departamento,
         telefono: usuarioAEditar.telefono || '',
         estado: usuarioAEditar.estado,
       });
@@ -47,8 +47,8 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
         codigo_institucional: 'U20241001',
         nombre_completo: '',
         correo: 'u20241001@utp.edu.pe',
-        rol: 'ESTUDIANTE',
-        carrera: 'Ingeniería de Sistemas e Informática',
+        rol: 'OPERADOR',
+        departamento: 'Soporte y Monitoreo de Salas',
         telefono: '999888777',
         estado: 'ACTIVO',
       });
@@ -82,9 +82,9 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
         {/* Cabecera */}
         <div className="modal-header">
           <div>
-            <h2>{isEditing ? 'Editar Usuario del Sistema' : '+ Registrar Nuevo Usuario'}</h2>
+            <h2>{isEditing ? 'Editar Personal del Sistema' : '+ Registrar Personal / Operador'}</h2>
             <span style={{ fontSize: '11.5px', color: '#64748b' }}>
-              Gestión de entidad relacional en tablas <code>usuarios</code> y <code>roles</code>
+              Gestión de cuentas institucionales en tablas <code>usuarios</code> y <code>roles</code>
             </span>
           </div>
           <button className="btn-icon-action" onClick={onClose}>
@@ -121,13 +121,13 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
 
               <div className="form-group">
                 <label className="form-label">
-                  Rol del Usuario <span style={{ color: '#c8102e' }}>*</span>
+                  Rol Institucional <span style={{ color: '#c8102e' }}>*</span>
                 </label>
                 <select className="form-select" {...register('rol')}>
-                  <option value="ESTUDIANTE">Estudiante</option>
-                  <option value="OPERADOR">Operador de Salas</option>
-                  <option value="ADMINISTRADOR">Administrador</option>
-                  <option value="DOCENTE">Docente</option>
+                  <option value="ADMINISTRADOR">Administrador de Campus</option>
+                  <option value="OPERADOR">Operador de Salas / TI</option>
+                  <option value="SUPERVISOR">Supervisor de Campus</option>
+                  <option value="RECEPCION_BIBLIOTECA">Recepción / Biblioteca</option>
                 </select>
               </div>
             </div>
@@ -135,7 +135,7 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
             {/* 2. Nombre Completo */}
             <div className="form-group">
               <label className="form-label">
-                Nombre Completo del Usuario <span style={{ color: '#c8102e' }}>*</span>
+                Nombre Completo del Personal <span style={{ color: '#c8102e' }}>*</span>
               </label>
               <input
                 type="text"
@@ -184,19 +184,19 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
               </div>
             </div>
 
-            {/* 4. Carrera y Estado */}
+            {/* 4. Departamento y Estado */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '12px' }}>
               <div className="form-group">
-                <label className="form-label">Carrera / Área Académica</label>
+                <label className="form-label">Área o Departamento</label>
                 <input
                   type="text"
-                  className={`form-input ${errors.carrera ? 'input-error' : ''}`}
-                  placeholder="Ej: Ingeniería de Sistemas"
-                  {...register('carrera')}
+                  className={`form-input ${errors.departamento ? 'input-error' : ''}`}
+                  placeholder="Ej: Soporte TI / Biblioteca"
+                  {...register('departamento')}
                 />
-                {errors.carrera && (
+                {errors.departamento && (
                   <span className="form-error-text">
-                    <AlertCircle size={13} /> {errors.carrera.message}
+                    <AlertCircle size={13} /> {errors.departamento.message}
                   </span>
                 )}
               </div>
@@ -223,7 +223,7 @@ export const ModalNuevoUsuario = ({ isOpen, onClose, usuarioAEditar }) => {
               className="btn-utp-primary"
               disabled={!isValid || isSubmitting}
             >
-              {isEditing ? 'Guardar Cambios' : 'Registrar Usuario'}
+              {isEditing ? 'Guardar Cambios' : 'Registrar Personal'}
             </button>
           </div>
         </form>

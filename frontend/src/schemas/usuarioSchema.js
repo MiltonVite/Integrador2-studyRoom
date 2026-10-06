@@ -13,7 +13,7 @@ export const loginSchema = z.object({
   recordarme: z.boolean().default(true),
 });
 
-// Esquema para Crear / Editar Usuario
+// Esquema para Crear / Editar Usuario del Personal Administrativo / Operativo
 export const usuarioFormSchema = z.object({
   codigo_institucional: codigoUTPSchema,
   nombre_completo: nombreCompletoSchema,
@@ -21,10 +21,10 @@ export const usuarioFormSchema = z.object({
     .string({ required_error: 'El correo es obligatorio' })
     .email('Correo inválido')
     .regex(/^[a-zA-Z0-9._%+-]+@utp\.edu\.pe$/i, 'Debe ser un correo institucional (@utp.edu.pe)'),
-  rol: z.enum(['ADMINISTRADOR', 'OPERADOR', 'ESTUDIANTE', 'DOCENTE'], {
-    required_error: 'Selecciona un rol de usuario',
+  rol: z.enum(['ADMINISTRADOR', 'OPERADOR', 'SUPERVISOR', 'RECEPCION_BIBLIOTECA'], {
+    required_error: 'Selecciona un rol de personal institucional',
   }),
-  carrera: z.string().min(1, 'Ingresa la carrera o departamento'),
+  departamento: z.string().min(1, 'Ingresa el departamento o área administrativa'),
   telefono: z.string().regex(/^[0-9]{9}$/, 'El teléfono debe tener 9 dígitos').optional().or(z.literal('')),
   estado: z.enum(['ACTIVO', 'INACTIVO', 'SUSPENDIDO']).default('ACTIVO'),
 });

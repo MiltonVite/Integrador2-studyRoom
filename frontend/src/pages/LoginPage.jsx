@@ -109,8 +109,8 @@ export const LoginPage = ({ onLoginSuccess }) => {
       <div className="login-form-container">
         <div className="login-form-card">
           <div className="login-card-header">
-            <h3>Iniciar Sesión</h3>
-            <p>Ingresa con tus credenciales institucionales UTP</p>
+            <h3>Acceso al Sistema</h3>
+            <p>Portal Administrativo y Operativo • Personal UTP</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -212,14 +212,14 @@ export const LoginPage = ({ onLoginSuccess }) => {
             <span>o ingresa como perfil de prueba</span>
           </div>
 
-          <div className="quick-access-grid">
+          <div className="quick-access-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
             <button
               type="button"
               className="quick-access-btn"
               onClick={() => handleQuickLogin('U20211045', 'ADMINISTRADOR')}
             >
               <strong>Milton Vite</strong>
-              <span>Administrador (Campus)</span>
+              <span>Administrador</span>
             </button>
             <button
               type="button"
@@ -227,7 +227,15 @@ export const LoginPage = ({ onLoginSuccess }) => {
               onClick={() => handleQuickLogin('U20184421', 'OPERADOR')}
             >
               <strong>Carlos Mendoza</strong>
-              <span>Operador de Salas</span>
+              <span>Operador TI</span>
+            </button>
+            <button
+              type="button"
+              className="quick-access-btn"
+              onClick={() => handleQuickLogin('U20179921', 'SUPERVISOR')}
+            >
+              <strong>Patricia Flores</strong>
+              <span>Supervisora</span>
             </button>
           </div>
 

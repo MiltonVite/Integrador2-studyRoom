@@ -3,8 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  // 0. Estado de Autenticación y Usuario Actual
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // 0. Estado de Autenticación y Usuario Actual (Inicia en false para mostrar el Login al arrancar)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usuarioActual, setUsuarioActual] = useState({
     id: 1,
     codigo_institucional: 'U20211045',
@@ -15,7 +15,7 @@ export const AppProvider = ({ children }) => {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
   });
 
-  // 0.1 Directorio de Usuarios (Tabla `usuarios` + `roles`)
+  // 0.1 Directorio de Personal y Usuarios del Sistema (Tabla `usuarios` + `roles`)
   const [usuarios, setUsuarios] = useState([
     {
       id: 1,
@@ -23,65 +23,54 @@ export const AppProvider = ({ children }) => {
       nombre_completo: 'Milton Vite Aldair',
       correo: 'u20211045@utp.edu.pe',
       rol: 'ADMINISTRADOR',
-      carrera: 'Ingeniería de Sistemas e Informática',
+      departamento: 'Dirección de TI & Sistemas Campus Piura',
       telefono: '987654321',
       estado: 'ACTIVO',
       fecha_creacion: '2026-01-15',
     },
     {
       id: 2,
-      codigo_institucional: 'U20199821',
-      nombre_completo: 'Andrea Ruiz Morales',
-      correo: 'u20199821@utp.edu.pe',
-      rol: 'ESTUDIANTE',
-      carrera: 'Ingeniería Industrial',
-      telefono: '912345678',
-      estado: 'ACTIVO',
-      fecha_creacion: '2026-02-10',
-    },
-    {
-      id: 3,
-      codigo_institucional: 'U18274563',
-      nombre_completo: 'Jorge Allaga Salazar',
-      correo: 'u18274563@utp.edu.pe',
-      rol: 'ESTUDIANTE',
-      carrera: 'Ingeniería de Software',
-      telefono: '923456789',
-      estado: 'ACTIVO',
-      fecha_creacion: '2026-02-14',
-    },
-    {
-      id: 4,
       codigo_institucional: 'U20184421',
       nombre_completo: 'Carlos Mendoza Ramos',
       correo: 'u20184421@utp.edu.pe',
       rol: 'OPERADOR',
-      carrera: 'Soporte y Operaciones TI',
+      departamento: 'Soporte Técnico y Monitoreo de Cámaras',
       telefono: '934567890',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-02-01',
+    },
+    {
+      id: 3,
+      codigo_institucional: 'U20179921',
+      nombre_completo: 'Patricia Flores Huamán',
+      correo: 'u20179921@utp.edu.pe',
+      rol: 'SUPERVISOR',
+      departamento: 'Coordinación de Biblioteca & Espacios de Estudio',
+      telefono: '912345678',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-02-15',
+    },
+    {
+      id: 4,
+      codigo_institucional: 'U20195512',
+      nombre_completo: 'Luis Barrientos Vega',
+      correo: 'u20195512@utp.edu.pe',
+      rol: 'OPERADOR',
+      departamento: 'Operaciones y Logística Campus',
+      telefono: '923456789',
       estado: 'ACTIVO',
       fecha_creacion: '2026-03-01',
     },
     {
       id: 5,
-      codigo_institucional: 'U21203491',
-      nombre_completo: 'Valeria Mendoza Castro',
-      correo: 'u21203491@utp.edu.pe',
-      rol: 'ESTUDIANTE',
-      carrera: 'Administración y Negocios',
+      codigo_institucional: 'U20203344',
+      nombre_completo: 'Carmen Rivera Peña',
+      correo: 'u20203344@utp.edu.pe',
+      rol: 'RECEPCION_BIBLIOTECA',
+      departamento: 'Módulo de Atención y Préstamo de Ambientes',
       telefono: '945678901',
       estado: 'ACTIVO',
-      fecha_creacion: '2026-03-12',
-    },
-    {
-      id: 6,
-      codigo_institucional: 'U22108923',
-      nombre_completo: 'Sofia Benites Wong',
-      correo: 'u22108923@utp.edu.pe',
-      rol: 'ESTUDIANTE',
-      carrera: 'Arquitectura',
-      telefono: '956789012',
-      estado: 'INACTIVO',
-      fecha_creacion: '2026-03-20',
+      fecha_creacion: '2026-03-10',
     },
   ]);
 

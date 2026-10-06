@@ -12,10 +12,19 @@ import { UsuariosPage } from './pages/UsuariosPage';
 import { ConfiguracionPage } from './pages/ConfiguracionPage';
 import { LoginPage } from './pages/LoginPage';
 
+import { puedeAccederTab } from './utils/permisos';
+
 const MainLayout = () => {
-  const { isAuthenticated } = useApp();
+  const { isAuthenticated, usuarioActual } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [simuladorOpen, setSimuladorOpen] = useState(false);
+
+  // Asegurar que si el usuario no tiene permiso para el tab actual, vuelva a dashboard
+  React.useEffect(() => {
+    if (!puedeAccederTab(usuarioActual?.rol, activeTab)) {
+      setActiveTab('dashboard');
+    }
+  }, [usuarioActual, activeTab]);
 
   // Si el usuario no ha iniciado sesión, se muestra la vista de Login institucional
   if (!isAuthenticated) {
@@ -24,7 +33,7 @@ const MainLayout = () => {
 
   return (
     <div className="app-container">
-      {/* Sidebar Lateral con enlaces de navegación y botón de cerrar sesión */}
+      {/* Sidebar Lateral con enlaces de navegación filtrados por rol */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -35,7 +44,7 @@ const MainLayout = () => {
       <div className="main-content">
         <Navbar onNavigateToCamaras={() => setActiveTab('camaras')} />
 
-        {/* Renderizado de Vistas según Tab activo */}
+        {/* Renderizado de Vistas según Tab activo y Permisos de Rol */}
         {activeTab === 'dashboard' && (
           <DashboardPage
             onNavigateToAlerts={() => setActiveTab('alertas')}
@@ -43,12 +52,12 @@ const MainLayout = () => {
           />
         )}
 
-        {activeTab === 'reservas' && <ReservasPage />}
-        {activeTab === 'camaras' && <CamarasPage />}
-        {activeTab === 'espera' && <ListaEsperaPage />}
-        {activeTab === 'alertas' && <AlertasPage />}
-        {activeTab === 'usuarios' && <UsuariosPage />}
-        {activeTab === 'configuracion' && <ConfiguracionPage />}
+        {activeTab === 'reservas' && puedeAccederTab(usuarioActual?.rol, 'reservas') && <ReservasPage />}
+        {activeTab === 'camaras' && puedeAccederTab(usuarioActual?.rol, 'camaras') && <CamarasPage />}
+        {activeTab === 'espera' && puedeAccederTab(usuarioActual?.rol, 'espera') && <ListaEsperaPage />}
+        {activeTab === 'alertas' && puedeAccederTab(usuarioActual?.rol, 'alertas') && <AlertasPage />}
+        {activeTab === 'usuarios' && puedeAccederTab(usuarioActual?.rol, 'usuarios') && <UsuariosPage />}
+        {activeTab === 'configuracion' && puedeAccederTab(usuarioActual?.rol, 'configuracion') && <ConfiguracionPage />}
       </div>
 
       {/* Modal de Simulación de Visión Artificial e Integración */}

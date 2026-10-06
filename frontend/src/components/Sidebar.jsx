@@ -12,19 +12,42 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { puedeAccederTab, tienePermiso, PERMISOS } from '../utils/permisos';
 
 export const Sidebar = ({ activeTab, setActiveTab, onOpenSimulador }) => {
   const { usuarioActual, logout } = useApp();
 
-  const navItems = [
+  const allNavItems = [
     { id: 'dashboard', label: 'Inicio', icon: LayoutDashboard },
     { id: 'reservas', label: 'Reservas', icon: Calendar },
     { id: 'camaras', label: 'Cámaras IA', icon: Camera },
     { id: 'espera', label: 'Lista de Espera', icon: Users },
     { id: 'alertas', label: 'Incidencias IA', icon: AlertTriangle },
-    { id: 'usuarios', label: 'Usuarios', icon: UserCheck },
+    { id: 'usuarios', label: 'Personal', icon: UserCheck },
     { id: 'configuracion', label: 'Configuración', icon: Settings },
   ];
+
+  // Filtrar elementos según la matriz de permisos del rol del usuario actual
+  const navItems = allNavItems.filter((item) =>
+    puedeAccederTab(usuarioActual?.rol, item.id)
+  );
+
+  const getRoleLabel = (rol) => {
+    switch (rol) {
+      case 'ADMINISTRADOR':
+        return 'Administrador de Campus';
+      case 'SUPERVISOR':
+        return 'Supervisor de Campus';
+      case 'OPERADOR':
+        return 'Operador de Monitoreo';
+      case 'SEGURIDAD':
+        return 'Seguridad de Campus';
+      case 'RECEPCION_BIBLIOTECA':
+        return 'Recepción / Biblioteca';
+      default:
+        return 'Personal UTP';
+    }
+  };
 
   return (
     <aside className="sidebar">
@@ -39,7 +62,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenSimulador }) => {
         </div>
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation Links Filtrados por Permisos */}
       <nav className="sidebar-nav">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -59,21 +82,17 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenSimulador }) => {
 
       {/* User Card & Simulator in Footer */}
       <div className="sidebar-footer">
-        <button className="sim-pill-btn" onClick={onOpenSimulador}>
-          <Sparkles size={15} color="#c8102e" />
-          <span>Simulador de Eventos</span>
-        </button>
+        {tienePermiso(usuarioActual?.rol, PERMISOS.USAR_SIMULADOR) && (
+          <button className="sim-pill-btn" onClick={onOpenSimulador}>
+            <Sparkles size={15} color="#c8102e" />
+            <span>Simulador de Eventos</span>
+          </button>
+        )}
 
         <div className="user-profile-box">
-          <div className="user-profile-name">{usuarioActual?.nombre_completo || 'Milton Aldair'}</div>
-          <div className="user-profile-id">{usuarioActual?.codigo_institucional || 'U20211045'}</div>
-          <span className="user-profile-role">
-            {usuarioActual?.rol === 'ADMINISTRADOR'
-              ? 'Administrador'
-              : usuarioActual?.rol === 'OPERADOR'
-              ? 'Operador TI'
-              : 'Estudiante'}
-          </span>
+          <div className="user-profile-name">{usuarioActual?.nombre_completo || 'Personal UTP'}</div>
+          <div className="user-profile-id">{usuarioActual?.codigo_institucional || 'UTP-001'}</div>
+          <span className="user-profile-role">{getRoleLabel(usuarioActual?.rol)}</span>
         </div>
 
         <button

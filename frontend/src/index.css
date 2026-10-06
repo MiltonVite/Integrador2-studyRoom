@@ -417,6 +417,42 @@ body {
   gap: 24px;
 }
 
+/* Encabezados de Vistas */
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 6px;
+}
+
+.view-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.view-title-wrap h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.view-title-wrap p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.view-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* Hero Banner */
 .hero-welcome-card {
   background-color: var(--bg-surface);

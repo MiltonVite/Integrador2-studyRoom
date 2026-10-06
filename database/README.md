@@ -21,12 +21,14 @@ Para cumplir con el requerimiento de que **ningún registro se elimine físicame
 
 ---
 
-## Estructura Modular y Normalización (3FN)
+## Estructura Modular y Normalización (3FN + RBAC)
 
 ```
 +-----------------------------------------------------------------------------------+
-|                            1. MÓDULO SEGURIDAD Y USUARIOS                         |
-|  roles (1) ───< (N) usuarios                                                      |
+|                         1. MÓDULO SEGURIDAD Y USUARIOS (RBAC)                     |
+|  roles (1) ───< (N) rol_permisos (N) >─── (1) permisos                            |
+|    │                                                                              |
+|    └───< (N) usuarios (Personal Administrativo y Operativo)                       |
 +-----------------------------------------------------------------------------------+
 |                      2. MÓDULO INFRAESTRUCTURA Y SALAS                            |
 |  pabellones (1) ──┐                                                               |
@@ -71,9 +73,11 @@ Para cumplir con el requerimiento de que **ningún registro se elimine físicame
 
 ## Catálogos Maestros y Tablas Principales
 
-### 1. Seguridad y Usuarios
-- **`roles`**: Catálogo de perfiles (`ADMINISTRADOR`, `SUPERVISOR`, `SEGURIDAD`, `ESTUDIANTE`).
-- **`usuarios`**: Datos de usuarios con `codigo_institucional`, `rol_id` y `eliminado_en`.
+### 1. Seguridad, Personal y Control de Acceso (RBAC)
+- **`roles`**: Catálogo de perfiles del personal (`ADMINISTRADOR`, `SUPERVISOR`, `OPERADOR`, `SEGURIDAD`, `RECEPCION_BIBLIOTECA`).
+- **`permisos`**: Catálogo de permisos atómicos del sistema (`VER_CAMARAS`, `LIBERAR_SALA`, `VER_CONFIGURACION`, `GESTIONAR_USUARIOS`, etc.).
+- **`rol_permisos`**: Tabla asociativa N:M que define la matriz de permisos concedidos a cada rol.
+- **`usuarios`**: Cuentas del personal administrativo y operativo con `codigo_institucional`, `rol_id`, `departamento` y `eliminado_en`.
 
 ### 2. Infraestructura y Monitoreo Físico
 - **`pabellones`**: Edificios y pabellones universitarios (`nombre`, `codigo`, `ubicacion`).

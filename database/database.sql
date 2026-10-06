@@ -26,30 +26,58 @@ DROP TABLE IF EXISTS estados_sala CASCADE;
 DROP TABLE IF EXISTS tipos_sala CASCADE;
 DROP TABLE IF EXISTS pabellones CASCADE;
 DROP TABLE IF EXISTS usuarios CASCADE;
+DROP TABLE IF EXISTS rol_permisos CASCADE;
+DROP TABLE IF EXISTS permisos CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
 
 -- =============================================================================
--- 1. MÓDULO: SEGURIDAD Y USUARIOS
+-- 1. MÓDULO: SEGURIDAD Y USUARIOS (RBAC)
 -- =============================================================================
 
 -- 1.1 Catálogo de Roles
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(50) UNIQUE NOT NULL,       -- Ej: 'ADMINISTRADOR', 'ESTUDIANTE', 'SEGURIDAD', 'SUPERVISOR'
+    nombre VARCHAR(50) UNIQUE NOT NULL,       -- Ej: 'ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'SEGURIDAD', 'RECEPCION_BIBLIOTECA'
     descripcion VARCHAR(255),
     esta_activo BOOLEAN NOT NULL DEFAULT TRUE,
     creado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     eliminado_en TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
--- 1.2 Usuarios del Sistema Institucional
+-- 1.2 Catálogo de Permisos del Sistema
+CREATE TABLE permisos (
+    id SERIAL PRIMARY KEY,
+    codigo VARCHAR(50) UNIQUE NOT NULL,       -- Ej: 'VER_CAMARAS', 'LIBERAR_SALA', 'VER_CONFIGURACION'
+    nombre VARCHAR(100) NOT NULL,            -- Ej: 'Visualizar Cámaras en Tiempo Real'
+    modulo VARCHAR(50) NOT NULL,             -- Ej: 'DASHBOARD', 'CAMARAS', 'RESERVAS', 'USUARIOS', 'CONFIGURACION'
+    descripcion VARCHAR(255),
+    creado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_permisos_codigo ON permisos(codigo);
+CREATE INDEX idx_permisos_modulo ON permisos(modulo);
+
+-- 1.3 Matriz de Roles y Permisos (Tabla Asociativa N:M)
+CREATE TABLE rol_permisos (
+    id SERIAL PRIMARY KEY,
+    rol_id INT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permiso_id INT NOT NULL REFERENCES permisos(id) ON DELETE CASCADE,
+    asignado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_rol_permiso UNIQUE(rol_id, permiso_id)
+);
+
+CREATE INDEX idx_rol_permisos_rol_id ON rol_permisos(rol_id);
+CREATE INDEX idx_rol_permisos_permiso_id ON rol_permisos(permiso_id);
+
+-- 1.4 Usuarios del Sistema Institucional (Personal Administrativo y Operativo)
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
-    codigo_institucional VARCHAR(50) UNIQUE NOT NULL, -- Código de estudiante o docente (ej: U20211045)
+    codigo_institucional VARCHAR(50) UNIQUE NOT NULL, -- Código de personal (ej: U20211045)
     nombre_completo VARCHAR(150) NOT NULL,
     correo VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     rol_id INT NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
+    departamento VARCHAR(150),                        -- Área administrativa o técnica (ej: 'Dirección TI')
     telefono VARCHAR(25),
     esta_activo BOOLEAN NOT NULL DEFAULT TRUE,
     creado_en TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -312,12 +340,73 @@ CREATE TABLE configuraciones_sistema (
 -- DATOS SEMILLA BASE (CATÁLOGOS, PARÁMETROS Y USUARIO ADMINISTRADOR)
 -- =============================================================================
 
--- 1. Roles del Sistema
+-- 1. Roles del Sistema Institucional (Personal Autorizado)
 INSERT INTO roles (nombre, descripcion) VALUES
-('ADMINISTRADOR', 'Acceso total a gestión de salas, usuarios, configuraciones y reportes'),
+('ADMINISTRADOR', 'Acceso total a gestión de salas, personal, configuraciones y reportes'),
 ('SUPERVISOR', 'Monitoreo de salas, revisión de alertas y gestión de incidencias'),
+('OPERADOR', 'Monitoreo de cámaras, protocolo de liberación de salas y visualización'),
 ('SEGURIDAD', 'Recepción de alertas de convivencia y presencia de alimentos en tiempo real'),
-('ESTUDIANTE', 'Consulta de salas disponibles, ingreso a lista de espera y visualización de reservas');
+('RECEPCION_BIBLIOTECA', 'Atención en módulo, consulta de salas y gestión de lista de espera');
+
+-- 1.1 Catálogo de Permisos del Sistema
+INSERT INTO permisos (codigo, nombre, modulo, descripcion) VALUES
+('VER_DASHBOARD', 'Visualizar Dashboard General', 'DASHBOARD', 'Acceso a métricas KPI y estado general de salas'),
+('VER_RESERVAS', 'Consultar Calendario de Reservas', 'RESERVAS', 'Visualizar la matriz de reservas programadas'),
+('CREAR_RESERVA', 'Registrar Nueva Reserva Presencial', 'RESERVAS', 'Crear reservas manuales en módulo de atención'),
+('LIBERAR_SALA', 'Ejecutar Liberación de Sala', 'SALAS', 'Liberar salas por protocolo de abandono o acción manual'),
+('VER_CAMARAS', 'Visualizar Cámaras en Tiempo Real', 'CAMARAS', 'Monitoreo de streaming RTSP y cajas delimitadoras IA'),
+('VER_LISTA_ESPERA', 'Consultar Lista de Espera', 'ESPERA', 'Ver estudiantes en cola de espera prioritaria'),
+('ASIGNAR_LISTA_ESPERA', 'Asignar Salas a Lista de Espera', 'ESPERA', 'Asignar espacios liberados a postulantes en cola'),
+('VER_INCIDENCIAS_IA', 'Consultar Auditoría e Incidencias IA', 'ALERTAS', 'Ver alertas de comida, desocupación o aforo'),
+('RESOLVER_INCIDENCIA', 'Resolver o Descartar Incidencias', 'ALERTAS', 'Confirmar liberación de sala o descartar falsos positivos'),
+('VER_USUARIOS', 'Consultar Directorio de Personal', 'USUARIOS', 'Ver lista de personal institucional autorizado'),
+('GESTIONAR_USUARIOS', 'Crear y Modificar Personal', 'USUARIOS', 'Registrar, editar y suspender cuentas de personal'),
+('VER_CONFIGURACION', 'Visualizar Configuración del Sistema', 'CONFIGURACION', 'Ver parámetros de tiempos y modelos de visión'),
+('EDITAR_CONFIGURACION', 'Modificar Parámetros y Tolerancias', 'CONFIGURACION', 'Ajustar minutos de tolerancia y umbrales IA'),
+('USAR_SIMULADOR', 'Ejecutar Simulador de Eventos IA', 'SIMULADOR', 'Disparar eventos sintéticos para pruebas de integración');
+
+-- 1.2 Matriz de Asignación de Permisos a Roles (RBAC)
+-- Permisos del ADMINISTRADOR (Todos los permisos del catálogo)
+INSERT INTO rol_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r CROSS JOIN permisos p
+WHERE r.nombre = 'ADMINISTRADOR';
+
+-- Permisos del SUPERVISOR
+INSERT INTO rol_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r JOIN permisos p ON p.codigo IN (
+    'VER_DASHBOARD', 'VER_RESERVAS', 'CREAR_RESERVA', 'LIBERAR_SALA',
+    'VER_CAMARAS', 'VER_LISTA_ESPERA', 'ASIGNAR_LISTA_ESPERA',
+    'VER_INCIDENCIAS_IA', 'RESOLVER_INCIDENCIA', 'USAR_SIMULADOR'
+)
+WHERE r.nombre = 'SUPERVISOR';
+
+-- Permisos del OPERADOR
+INSERT INTO rol_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r JOIN permisos p ON p.codigo IN (
+    'VER_DASHBOARD', 'VER_RESERVAS', 'LIBERAR_SALA',
+    'VER_CAMARAS', 'VER_INCIDENCIAS_IA', 'RESOLVER_INCIDENCIA', 'USAR_SIMULADOR'
+)
+WHERE r.nombre = 'OPERADOR';
+
+-- Permisos de SEGURIDAD
+INSERT INTO rol_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r JOIN permisos p ON p.codigo IN (
+    'VER_DASHBOARD', 'VER_CAMARAS', 'VER_INCIDENCIAS_IA'
+)
+WHERE r.nombre = 'SEGURIDAD';
+
+-- Permisos de RECEPCION_BIBLIOTECA
+INSERT INTO rol_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+FROM roles r JOIN permisos p ON p.codigo IN (
+    'VER_DASHBOARD', 'VER_RESERVAS', 'CREAR_RESERVA',
+    'VER_LISTA_ESPERA', 'ASIGNAR_LISTA_ESPERA'
+)
+WHERE r.nombre = 'RECEPCION_BIBLIOTECA';
 
 -- 2. Tipos de Sala
 INSERT INTO tipos_sala (nombre, descripcion) VALUES
@@ -382,5 +471,5 @@ INSERT INTO configuraciones_sistema (clave, valor, descripcion) VALUES
 
 -- 10. Usuario Administrador Inicial (Acceso al Sistema)
 -- Contraseña de prueba por defecto: 'admin123' (hash bcrypt)
-INSERT INTO usuarios (codigo_institucional, nombre_completo, correo, password_hash, rol_id, telefono) VALUES
-('ADM001', 'Administrador General', 'admin@universidad.edu.pe', '$2b$12$K8yXv1WzQvE9kP0tH3y6euZ.mD0zRkI7sVjJ1r1WqLz6.JtF/e4lq', 1, '+51987654321');
+INSERT INTO usuarios (codigo_institucional, nombre_completo, correo, password_hash, rol_id, departamento, telefono) VALUES
+('ADM001', 'Administrador General', 'admin@universidad.edu.pe', '$2b$12$K8yXv1WzQvE9kP0tH3y6euZ.mD0zRkI7sVjJ1r1WqLz6.JtF/e4lq', 1, 'Dirección de Tecnologías de la Información', '+51987654321');

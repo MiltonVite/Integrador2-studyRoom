@@ -9,15 +9,20 @@ import {
   Sparkles,
   LogOut,
   GraduationCap,
+  UserCheck,
 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 export const Sidebar = ({ activeTab, setActiveTab, onOpenSimulador }) => {
+  const { usuarioActual, logout } = useApp();
+
   const navItems = [
     { id: 'dashboard', label: 'Inicio', icon: LayoutDashboard },
     { id: 'reservas', label: 'Reservas', icon: Calendar },
     { id: 'camaras', label: 'Cámaras IA', icon: Camera },
     { id: 'espera', label: 'Lista de Espera', icon: Users },
     { id: 'alertas', label: 'Incidencias IA', icon: AlertTriangle },
+    { id: 'usuarios', label: 'Usuarios', icon: UserCheck },
     { id: 'configuracion', label: 'Configuración', icon: Settings },
   ];
 
@@ -60,15 +65,22 @@ export const Sidebar = ({ activeTab, setActiveTab, onOpenSimulador }) => {
         </button>
 
         <div className="user-profile-box">
-          <div className="user-profile-name">Milton Aldair</div>
-          <div className="user-profile-id">DNI: U20211045</div>
-          <span className="user-profile-role">Administrador</span>
+          <div className="user-profile-name">{usuarioActual?.nombre_completo || 'Milton Aldair'}</div>
+          <div className="user-profile-id">{usuarioActual?.codigo_institucional || 'U20211045'}</div>
+          <span className="user-profile-role">
+            {usuarioActual?.rol === 'ADMINISTRADOR'
+              ? 'Administrador'
+              : usuarioActual?.rol === 'OPERADOR'
+              ? 'Operador TI'
+              : 'Estudiante'}
+          </span>
         </div>
 
         <button
           className="nav-item"
-          style={{ padding: '8px 12px', fontSize: '12.5px', color: '#64748b' }}
-          onClick={() => alert('Sesión cerrada')}
+          style={{ padding: '8px 12px', fontSize: '12.5px', color: '#dc2626' }}
+          onClick={logout}
+          title="Cerrar Sesión"
         >
           <LogOut size={16} />
           <span>Cerrar sesión</span>

@@ -4,7 +4,7 @@ Este módulo contiene la aplicación web desarrollada en **React 18 + Vite** con
 
 ---
 
-## 🏗️ Arquitectura y Tecnologías
+##  Arquitectura y Tecnologías
 
 - **Framework:** React 18
 - **Empaquetador y Entorno:** Vite 5
@@ -15,7 +15,7 @@ Este módulo contiene la aplicación web desarrollada en **React 18 + Vite** con
 
 ---
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 frontend/
@@ -47,7 +47,7 @@ frontend/
 
 ---
 
-## 🖥️ Módulos y Vistas Desarrolladas
+##  Módulos y Vistas Desarrolladas
 
 ### 1. Inicio / Dashboard (`DashboardPage.jsx`)
 - **Hero Card de Bienvenida:** Saludo personalizado con badge de rol (*Administrador*) y selector de fecha.
@@ -91,7 +91,7 @@ frontend/
 
 ---
 
-## 🚀 Despliegue y Ejecución
+##  Despliegue y Ejecución
 
 ### Opción 1: Con Docker Compose (Frontend Únicamente)
 

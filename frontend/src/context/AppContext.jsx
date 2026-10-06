@@ -3,6 +3,88 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  // 0. Estado de Autenticación y Usuario Actual
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [usuarioActual, setUsuarioActual] = useState({
+    id: 1,
+    codigo_institucional: 'U20211045',
+    nombre_completo: 'Milton Vite Aldair',
+    correo: 'u20211045@utp.edu.pe',
+    rol: 'ADMINISTRADOR',
+    campus: 'Campus Piura',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  });
+
+  // 0.1 Directorio de Usuarios (Tabla `usuarios` + `roles`)
+  const [usuarios, setUsuarios] = useState([
+    {
+      id: 1,
+      codigo_institucional: 'U20211045',
+      nombre_completo: 'Milton Vite Aldair',
+      correo: 'u20211045@utp.edu.pe',
+      rol: 'ADMINISTRADOR',
+      carrera: 'Ingeniería de Sistemas e Informática',
+      telefono: '987654321',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-01-15',
+    },
+    {
+      id: 2,
+      codigo_institucional: 'U20199821',
+      nombre_completo: 'Andrea Ruiz Morales',
+      correo: 'u20199821@utp.edu.pe',
+      rol: 'ESTUDIANTE',
+      carrera: 'Ingeniería Industrial',
+      telefono: '912345678',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-02-10',
+    },
+    {
+      id: 3,
+      codigo_institucional: 'U18274563',
+      nombre_completo: 'Jorge Allaga Salazar',
+      correo: 'u18274563@utp.edu.pe',
+      rol: 'ESTUDIANTE',
+      carrera: 'Ingeniería de Software',
+      telefono: '923456789',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-02-14',
+    },
+    {
+      id: 4,
+      codigo_institucional: 'U20184421',
+      nombre_completo: 'Carlos Mendoza Ramos',
+      correo: 'u20184421@utp.edu.pe',
+      rol: 'OPERADOR',
+      carrera: 'Soporte y Operaciones TI',
+      telefono: '934567890',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-03-01',
+    },
+    {
+      id: 5,
+      codigo_institucional: 'U21203491',
+      nombre_completo: 'Valeria Mendoza Castro',
+      correo: 'u21203491@utp.edu.pe',
+      rol: 'ESTUDIANTE',
+      carrera: 'Administración y Negocios',
+      telefono: '945678901',
+      estado: 'ACTIVO',
+      fecha_creacion: '2026-03-12',
+    },
+    {
+      id: 6,
+      codigo_institucional: 'U22108923',
+      nombre_completo: 'Sofia Benites Wong',
+      correo: 'u22108923@utp.edu.pe',
+      rol: 'ESTUDIANTE',
+      carrera: 'Arquitectura',
+      telefono: '956789012',
+      estado: 'INACTIVO',
+      fecha_creacion: '2026-03-20',
+    },
+  ]);
+
   // 1. Estado de Salas de Estudio (Salas 101 a 106 del wireframe UTP)
   const [salas, setSalas] = useState([
     {
@@ -366,9 +448,70 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  // Acciones de Autenticación
+  const login = (datosLogin) => {
+    setIsAuthenticated(true);
+    // Si viene código o correo, actualizamos el nombre simulado
+    if (datosLogin?.identificador) {
+      const idClean = datosLogin.identificador.toUpperCase().trim();
+      const userFound = usuarios.find(
+        (u) => u.codigo_institucional === idClean || u.correo.toUpperCase() === idClean
+      );
+      if (userFound) {
+        setUsuarioActual(userFound);
+      }
+    }
+    addToast('¡Bienvenido al Sistema de Gestión de Salas de Estudio UTP!', 'success');
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    addToast('Sesión cerrada correctamente.', 'warning');
+  };
+
+  // Acciones de Gestión de Usuarios
+  const crearUsuario = (nuevoUser) => {
+    const id = Date.now();
+    const usuarioCreado = {
+      id,
+      ...nuevoUser,
+      fecha_creacion: new Date().toISOString().split('T')[0],
+    };
+    setUsuarios((prev) => [usuarioCreado, ...prev]);
+    addToast(`Usuario ${nuevoUser.nombre_completo} registrado con éxito.`, 'success');
+  };
+
+  const actualizarUsuario = (id, datosActualizados) => {
+    setUsuarios((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, ...datosActualizados } : u))
+    );
+    addToast('Datos de usuario actualizados.', 'success');
+  };
+
+  const cambiarEstadoUsuario = (id) => {
+    setUsuarios((prev) =>
+      prev.map((u) => {
+        if (u.id === id) {
+          const nuevoEstado = u.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+          addToast(`Estado de usuario cambiado a ${nuevoEstado}`, 'warning');
+          return { ...u, estado: nuevoEstado };
+        }
+        return u;
+      })
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
+        isAuthenticated,
+        usuarioActual,
+        usuarios,
+        login,
+        logout,
+        crearUsuario,
+        actualizarUsuario,
+        cambiarEstadoUsuario,
         salas,
         alertas,
         listaEspera,

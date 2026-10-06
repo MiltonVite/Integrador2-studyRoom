@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # ---------------------------------------------------------------------------
-  # BASE DE DATOS POSTGRESQL
+  # BASE DE DATOS POSTGRESQL 16
   # ---------------------------------------------------------------------------
   db:
     image: postgres:16-alpine
@@ -22,6 +22,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - studyroom_network
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND WEB REACT + VITE (UTP UI)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: studyroom_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
     networks:
       - studyroom_network
 
